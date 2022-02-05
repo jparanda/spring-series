@@ -1,0 +1,26 @@
+#Server port
+server:
+  port: 8083
+
+spring:
+  #datasource
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/customer_db
+    username: admin
+    password: 12345
+  #JPA properties
+  jpa:
+    hibernate:
+      ddl-auto: none # drop n create table, good for testing, comment this in production
+    show-sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  # Logger configuration
+  logging:
+    pattern:
+      console: "%d %-5level %logger : %msg%n"
+    level:
+      org.springframework: debug
+      org.hibernate: debug
+      com.juan.spring.series: info
