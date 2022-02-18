@@ -5,6 +5,9 @@ import com.juan.spring.series.exception.ResourceNotFoundException;
 import com.juan.spring.series.model.Customer;
 import com.juan.spring.series.repository.CustomerRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,21 +23,23 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
+    @CachePut(value = "customers", key = "#request.dni")
     public Customer registerCustomer(CustomerDTO request) {
         Customer customer = Customer.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
+                .dni(request.getDni())
                 .email(request.getEmail())
                 .build();
 
-        customerRepository.save(customer);
-        return customer;
+        return customerRepository.save(customer);
     }
 
-    public Customer retrieveCustomer(Long id) {
-        log.info("retrieve customer by id {} from DB", id);
-        return customerRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Not found customer by id "+ id));
+    @Cacheable(cacheNames = "customers" , key = "#dni")
+    public Customer retrieveCustomerByDni(String dni) {
+        log.info("retrieve customer by dni {} from DB", dni);
+        return customerRepository.findByDni(dni)
+                .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni "+ dni));
     }
 
     public List<Customer> retrieveAllCustomer() {
@@ -42,21 +47,21 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    public Customer updateCustomer(Long id, CustomerDTO customerDTO) {
-        Optional<Customer> optCustomer = customerRepository.findById(id);
+    @CachePut(value = "customers", key = "#customer.dni")
+    public Customer updateCustomer(Customer customer) {
+        log.info("Updating Customer with dni {}", customer.getDni());
+        Optional<Customer> optCustomer = customerRepository.findByDni(customer.getDni());
         if (!optCustomer.isPresent()) {
-            throw new ResourceNotFoundException("Not found customer by id "+ id);
+            throw new ResourceNotFoundException("Not found customer by dni " + customer.getDni());
         }
-        Customer customerToUpdate = optCustomer.get();
-        customerToUpdate.setFirstName(customerDTO.getFirstName());
-        customerToUpdate.setLastName(customerDTO.getLastName());
-        customerToUpdate.setEmail(customerDTO.getEmail());
-        return customerRepository.save(customerToUpdate);
+        return customerRepository.save(customer);
     }
 
-    public void deleteCustomer(Long id) {
-        Customer customerToDelete = customerRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Not found customer by id "+ id));
+    @CacheEvict(value = "customers", key = "#dni")
+    public void deleteCustomer(String dni) {
+        log.info("Deleting Customer with dni {}", dni);
+        Customer customerToDelete = customerRepository.findByDni(dni)
+                .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni " + dni));
         customerRepository.delete(customerToDelete);
     }
 

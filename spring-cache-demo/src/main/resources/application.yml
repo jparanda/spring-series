@@ -13,7 +13,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none # drop n create table, good for testing, comment this in production
-    show-sql: true
+    show-sql: false
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   # Logger configuration

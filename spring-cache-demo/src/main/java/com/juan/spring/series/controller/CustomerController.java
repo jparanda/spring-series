@@ -24,36 +24,37 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<Customer> registerCustomer(@RequestBody CustomerDTO request) {
-        log.info("new Customer registration {}", request);
         Customer customer = customerService.registerCustomer(request);
         return ResponseEntity.ok().body(customer);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Customer> retrieveCustomer(@PathVariable long id) {
-        log.info("Retrieve Customer by id {}", id);
-        Customer optCustomer = customerService.retrieveCustomer(id);
+    @GetMapping("/{dni}")
+    public ResponseEntity<Customer> retrieveCustomer(@PathVariable String dni) {
+        Customer optCustomer = customerService.retrieveCustomerByDni(dni);
         return new ResponseEntity<>(optCustomer, HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<List<Customer>> retrieveAllCustomer() {
-        log.info("Retrieve all Customer");
         List<Customer> customers = customerService.retrieveAllCustomer();
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable long id, @RequestBody CustomerDTO
+    @PutMapping("/{dni}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable String dni, @RequestBody CustomerDTO
             customerDTO) {
-        log.info("Updating Customer with id {}", id);
-        Customer uptCustomer = customerService.updateCustomer(id, customerDTO);
+        Customer customerToUpdate = Customer.builder()
+                .firstName(customerDTO.getFirstName())
+                .lastName(customerDTO.getLastName())
+                .dni(customerDTO.getDni())
+                .email(customerDTO.getEmail())
+                .build();
+        Customer uptCustomer = customerService.updateCustomer(customerToUpdate);
         return ResponseEntity.ok().body(uptCustomer);
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteCustomer(@PathVariable long id) {
-        log.info("Deleting Customer with id {}", id);
-        customerService.deleteCustomer(id);
+    @DeleteMapping("/{dni}")
+    public void deleteCustomer(@PathVariable String dni) {
+        customerService.deleteCustomer(dni);
     }
 }
