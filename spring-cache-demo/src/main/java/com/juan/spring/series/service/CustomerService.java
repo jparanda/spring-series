@@ -23,28 +23,31 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    @CachePut(value = "customers", key = "#request.dni")
-    public Customer registerCustomer(CustomerDTO request) {
-        Customer customer = Customer.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .dni(request.getDni())
-                .email(request.getEmail())
-                .build();
-
-        return customerRepository.save(customer);
-    }
-
-    @Cacheable(cacheNames = "customers" , key = "#dni")
+    @Cacheable(cacheNames = "customers" , key = "#dni", condition = "#dni.length == 8")
     public Customer retrieveCustomerByDni(String dni) {
         log.info("retrieve customer by dni {} from DB", dni);
         return customerRepository.findByDni(dni)
                 .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni "+ dni));
     }
 
-    public List<Customer> retrieveAllCustomer() {
-        log.info("Retrieve all user from DB");
-        return customerRepository.findAll();
+    @Cacheable(cacheNames = "customers" , key = "#dni", unless = "#result.age > 18")
+    public Customer retrieveCustomerByDniV2(String dni) {
+        log.info("retrieve customer by dni {} from DB", dni);
+        return customerRepository.findByDni(dni)
+                .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni "+ dni));
+    }
+
+    @CachePut(value = "customers", key = "#request.dni")
+    public Customer registerCustomer(CustomerDTO request) {
+        Customer customer = Customer.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .dni(request.getDni())
+                .age(request.getAge())
+                .email(request.getEmail())
+                .build();
+
+        return customerRepository.save(customer);
     }
 
     @CachePut(value = "customers", key = "#customer.dni")
@@ -63,6 +66,11 @@ public class CustomerService {
         Customer customerToDelete = customerRepository.findByDni(dni)
                 .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni " + dni));
         customerRepository.delete(customerToDelete);
+    }
+
+    public List<Customer> retrieveAllCustomer() {
+        log.info("Retrieve all user from DB");
+        return customerRepository.findAll();
     }
 
 

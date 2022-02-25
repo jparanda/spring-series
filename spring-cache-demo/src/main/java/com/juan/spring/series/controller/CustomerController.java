@@ -34,6 +34,12 @@ public class CustomerController {
         return new ResponseEntity<>(optCustomer, HttpStatus.OK);
     }
 
+    @GetMapping("/v2/{dni}")
+    public ResponseEntity<Customer> retrieveCustomerV2(@PathVariable String dni) {
+        Customer optCustomer = customerService.retrieveCustomerByDniV2(dni);
+        return new ResponseEntity<>(optCustomer, HttpStatus.OK);
+    }
+
     @GetMapping
     public ResponseEntity<List<Customer>> retrieveAllCustomer() {
         List<Customer> customers = customerService.retrieveAllCustomer();

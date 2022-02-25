@@ -30,6 +30,9 @@ public class Customer {
     @Column(name = "dni")
     private String dni;
 
+    @Column(name = "age")
+    private int age;
+
     @Column(name="email")
     private String email;
 }
