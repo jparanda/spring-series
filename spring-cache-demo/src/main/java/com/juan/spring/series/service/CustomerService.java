@@ -30,14 +30,13 @@ public class CustomerService {
                 .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni "+ dni));
     }
 
-    @Cacheable(cacheNames = "customers" , key = "#dni", unless = "#result.age > 18")
+    @Cacheable(cacheNames = "customers" , key = "#dni", unless = "#result.getAge() < 18")
     public Customer retrieveCustomerByDniV2(String dni) {
         log.info("retrieve customer by dni {} from DB", dni);
         return customerRepository.findByDni(dni)
                 .orElseThrow(()->new ResourceNotFoundException("Not found customer by dni "+ dni));
     }
 
-    @CachePut(value = "customers", key = "#request.dni")
     public Customer registerCustomer(CustomerDTO request) {
         Customer customer = Customer.builder()
                 .firstName(request.getFirstName())
